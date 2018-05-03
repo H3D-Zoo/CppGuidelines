@@ -106,4 +106,31 @@ int类型可以包含的信息太广泛了，我们需要猜测一下这四个in
 	void draw_rectangle(Point top_left, Point bottom_right);
     void draw_rectangle(Point top_left, Size height_width);
 
+##### 以下情况需要考虑到这条建议
 
+* 参数无相关，但是类型相同并连续出现
+
+		void copy_n(T* p,T* q,int n) //copy from p to q
+		这个接口的问题在于容易拷贝from和to,应该使用const修饰from参数:
+		void copy_n(const T* p,T* q,int n)
+
+* 函数参数过多
+
+		void f(int* some_ints, int some_ints_length);
+		应该被替换成:
+		void f(span<int> some_ints);//cpp17
+
+### I.1 接口类型其函数声明应该是纯虚的
+
+##### 原因
+* 引擎已经这么干了
+* 使用该接口不需要链接
+
+##### 实施
+	engine_interface符合该原则
+
+##### 例外
+	析构函数应该不应该是纯虚的
+		virtual ~IModel()=0{}; 
+		不符合标准，不利于引入第三方代码检查工具,应该改为如下:
+		~IModel() {};
